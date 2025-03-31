@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from database import get_db, get_cursor
 from datetime import datetime
+from config import LOCATION_UPDATE_THRESHOLD_MINUTES
 
 router = APIRouter()
 
@@ -38,14 +39,25 @@ async def get_stats():
         """)
         restricted_areas = cursor.fetchone()['count']
 
-        # Get number of patients with no recent updates (more than 10 minutes)
+        # Get number of active no-update alarms
         cursor.execute("""
+            SELECT COUNT(*) as count FROM alarms 
+            WHERE alarm_type = 'no_update' 
+            AND status = 'active'
+        """)
+        no_updates = cursor.fetchone()['count']
+
+        # LEGACY CODE - Kept for reference
+        # This was the original way of calculating no_updates directly from locations table
+        """
+        cursor.execute('''
             SELECT COUNT(*) as count FROM users u
             LEFT JOIN locations l ON u.id = l.user_id
             WHERE l.id IS NULL OR 
-            TIMESTAMPDIFF(MINUTE, l.timestamp, NOW()) > 10
-        """)
-        no_updates = cursor.fetchone()['count']
+            TIMESTAMPDIFF(MINUTE, l.timestamp, NOW()) > %s
+        ''', (LOCATION_UPDATE_THRESHOLD_MINUTES,))
+        no_updates_from_locations = cursor.fetchone()['count']
+        """
 
         cursor.close()
         conn.close()

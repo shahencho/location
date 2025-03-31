@@ -51,4 +51,7 @@ MONITORING_CONFIG = {
     "NO_UPDATE_THRESHOLD": 32400,  # 9 hours in seconds (trigger alarm if no update)
     "RESTRICTED_ZONE_RADIUS": 100,  # meters (matches RESTRICTED_ZONE_OFFSET)
     "ALLOWED_RADIUS": MAP_CONFIG["DEFAULT_ALLOWED_RADIUS"]  # Use the same value as map config
-} 
+}
+
+# Location monitoring configuration
+LOCATION_UPDATE_THRESHOLD_MINUTES = 10  # Time threshold to consider location update as stale 
