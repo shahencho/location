@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Request
-from routes import locations
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from routes import locations, stats, map, config
+import os
 import datetime
 import json
 from database import get_db
@@ -18,19 +21,30 @@ class LocationUpdate(BaseModel):
         populate_by_name = True
         allow_population_by_field_name = True
 
-app = FastAPI(title="OwnTracks Location API")
+app = FastAPI(title="Location Monitoring Dashboard")
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Add your frontend URLs
+    allow_origins=["*"],  # For development - restrict in production
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include location routes
+# Mount templates directory
+templates = Jinja2Templates(directory="templates")
+
+# Include routers
 app.include_router(locations.router)
+app.include_router(stats.router)
+app.include_router(map.router)
+app.include_router(config.router)
+
+@app.get("/")
+async def home(request: Request):
+    """Serve the dashboard HTML"""
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/location", summary="Update device location")
 async def receive_location(location: LocationUpdate):
@@ -87,6 +101,7 @@ async def receive_location(location: LocationUpdate):
         if conn:
             conn.close()
 
-@app.get("/")
+@app.get("/health")
 def health_check():
-    return {"status": "running", "time": datetime.datetime.now().isoformat()}
+    """Health check endpoint"""
+    return {"status": "healthy"}

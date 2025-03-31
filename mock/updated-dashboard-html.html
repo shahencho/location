@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Monitoring Dashboard</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --warning-color: #f39c12;
+      --success-color: #2ecc71;
+      --text-color: #333;
+      --light-gray: #f5f5f5;
+      --border-color: #ddd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      color: var(--text-color);
+    }
+
+    .navbar {
+      background-color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+      font-weight: bold;
+      font-size: 24px;
+      color: var(--primary-color);
+    }
+
+    .navigation {
+      display: flex;
+      gap: 20px;
+    }
+
+    .navigation a {
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .navigation a.active {
+      color: var(--secondary-color);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    
+    .dashboard-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .main-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .add-patient-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card h3 {
+      margin-top: 0;
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: 16px;
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 10px 0;
+      color: var(--primary-color);
+    }
+
+    .stat-card p {
+      margin-bottom: 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .alarm-count {
+      background-color: var(--accent-color);
+      color: white;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .alarms-panel, .map-panel {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .alarms-panel p, .map-panel p {
+      color: #666;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filter-buttons button {
+      padding: 8px 15px;
+      border: 1px solid var(--border-color);
+      background-color: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .filter-buttons button.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .alarms-list {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .alarm-item {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--secondary-color);
+      background-color: var(--light-gray);
+      position: relative;
+    }
+
+    .alarm-item h3 {
+      margin-top: 10px;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .alarm-item p {
+      margin: 0 0 15px;
+    }
+
+    .alarm-type-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+
+    .alarm-item.distance .alarm-type-badge {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .alarm-item.restricted .alarm-type-badge {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .alarm-item.no-update .alarm-type-badge {
+      background-color: var(--warning-color);
+      color: white;
+    }
+
+    .alarm-time {
+      color: #666;
+      font-size: 12px;
+      display: inline-block;
+    }
+
+    .resolve-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .alarm-item.distance {
+      border-left-color: var(--secondary-color);
+    }
+
+    .alarm-item.restricted {
+      border-left-color: var(--accent-color);
+    }
+
+    .alarm-item.no-update {
+      border-left-color: var(--warning-color);
+    }
+
+    .map-container {
+      width: 100%;
+      height: 500px;
+      background-color: #eee;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .icon-warning {
+      font-size: 48px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    .map-info {
+      width: 80%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">Roam</div>
+    <div class="navigation">
+      <a href="#" class="active">Monitor</a>
+      <a href="#">Dashboard</a>
+      <a href="#">Patients</a>
+      <a href="#">Settings</a>
+    </div>
+    <div class="user-avatar">JD</div>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <h1 class="main-title">Dashboard</h1>
+      <button class="add-patient-btn">Add Patient</button>
+    </div>
+    
+    <!-- Stats Section -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <h3>Active Alarms</h3>
+        <span class="stat-value">5</span>
+        <p>There are active alarms that need attention</p>
+      </div>
+      <div class="stat-card">
+        <h3>Patients</h3>
+        <span class="stat-value">10</span>
+        <p>Total patients being monitored</p>
+      </div>
+      <div class="stat-card">
+        <h3>Distance Violations</h3>
+        <span class="stat-value">2</span>
+        <p>Patients outside their allowed radius</p>
+      </div>
+      <div class="stat-card">
+        <h3>Restricted Areas</h3>
+        <span class="stat-value">1</span>
+        <p>Patients in prohibited zones</p>
+      </div>
+      <div class="stat-card">
+        <h3>No Updates</h3>
+        <span class="stat-value">2</span>
+        <p>Patients with missing location updates</p>
+      </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Alarms Panel -->
+      <div class="alarms-panel">
+        <div class="panel-header">
+          <h2>Active Alarms</h2>
+          <span class="alarm-count">5 Alerts</span>
+        </div>
+        <p>Real-time monitoring of patient location violations</p>
+        
+        <div class="search-box">
+          <input type="text" placeholder="Search alarms...">
+        </div>
+        
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+          <button class="active">All</button>
+          <button>Distance</button>
+          <button>Restricted</button>
+          <button>No Update</button>
+        </div>
+        
+        <!-- Alarms List -->
+        <div class="alarms-list">
+          <div class="alarm-item distance">
+            <div class="alarm-type-badge">Distance</div>
+            <div class="alarm-time">2:47 AM · Mar 30, 2025</div>
+            <h3>Sarah Johnson</h3>
+            <p>Patient is 23.5km away from designated location</p>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          
+          <div class="alarm-item restricted">
+            <div class="alarm-type-badge">Restricted</div>
+            <div class="alarm-time">3:15 AM · Mar 30, 2025</div>
+            <h3>Michael Chen</h3>
+            <p>Patient is in restricted area: Restricted Zone 3</p>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          
+          <div class="alarm-item no-update">
+            <div class="alarm-type-badge">No Update</div>
+            <div class="alarm-time">2:47 AM · Mar 30, 2025</div>
+            <h3>David Martinez</h3>
+            <p>No location update received in the last 5 hours</p>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          
+          <div class="alarm-item distance">
+            <div class="alarm-type-badge">Distance</div>
+            <div class="alarm-time">1:32 AM · Mar 30, 2025</div>
+            <h3>Emma Rodriguez</h3>
+            <p>Patient is 21.2km away from designated location</p>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+          
+          <div class="alarm-item no-update">
+            <div class="alarm-type-badge">No Update</div>
+            <div class="alarm-time">12:18 AM · Mar 30, 2025</div>
+            <h3>James Wilson</h3>
+            <p>No location update received in the last 4 hours</p>
+            <button class="resolve-btn">Resolve</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Map Panel -->
+      <div class="map-panel">
+        <div class="panel-header">
+          <h2>Location Monitoring</h2>
+        </div>
+        <p>View all active alarm locations and restricted areas</p>
+        
+        <div class="map-container">
+          <div class="map-placeholder">
+            <div class="icon-warning">⚠️</div>
+            <h3>Map Loading</h3>
+            <p class="map-info">Google Maps integration will display patient locations, restricted zones, and allowed radius boundaries.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
