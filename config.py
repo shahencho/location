@@ -46,6 +46,9 @@ DB_CONFIG = {
 
 # Monitoring Configuration
 MONITORING_CONFIG = {
-    "UPDATE_INTERVAL": 600000,  # 10 minutes in milliseconds
-    "NO_UPDATE_THRESHOLD": 14400  # 4 hours in seconds
+    "UPDATE_INTERVAL": 600000,  # 10 minutes in milliseconds (frontend refresh rate)
+    "EXPECTED_UPDATE_INTERVAL": 10800,  # 3 hours in seconds (expected location update frequency)
+    "NO_UPDATE_THRESHOLD": 32400,  # 9 hours in seconds (trigger alarm if no update)
+    "RESTRICTED_ZONE_RADIUS": 100,  # meters (matches RESTRICTED_ZONE_OFFSET)
+    "ALLOWED_RADIUS": MAP_CONFIG["DEFAULT_ALLOWED_RADIUS"]  # Use the same value as map config
 } 

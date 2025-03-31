@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from routes import locations, stats, map, config
+from routes import locations, stats, map, config, alarms, alarm_generator
 import os
 import datetime
 import json
@@ -40,6 +40,8 @@ app.include_router(locations.router)
 app.include_router(stats.router)
 app.include_router(map.router)
 app.include_router(config.router)
+app.include_router(alarms.router)
+app.include_router(alarm_generator.router)
 
 @app.get("/")
 async def home(request: Request):
