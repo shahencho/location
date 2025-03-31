@@ -168,25 +168,38 @@
         }
 
         .filter-buttons {
+            margin: 20px 0;
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
         }
 
-        .filter-buttons button {
-            padding: 8px 15px;
-            border: 1px solid var(--border-color);
-            background-color: white;
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
             border-radius: 20px;
+            background: white;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
         }
 
-        .filter-buttons button.active {
-            background-color: var(--primary-color);
+        .filter-btn.active {
+            background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
+        }
+
+        .filter-btn .count {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .filter-btn.active .count {
+            background: rgba(255,255,255,0.2);
         }
 
         .map-container {
@@ -274,75 +287,82 @@
         }
 
         .alarm-item {
-            padding: 15px;
+            background: white;
             border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--secondary-color);
-            background-color: var(--light-gray);
-            position: relative;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
         }
 
-        .alarm-item h3 {
-            margin-top: 10px;
-            margin-bottom: 5px;
-            font-size: 16px;
+        .alarm-content {
+            flex: 1;
         }
 
-        .alarm-item p {
-            margin: 0 0 15px;
+        .alarm-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
-        .alarm-type-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
+        .alarm-type {
+            padding: 4px 12px;
+            border-radius: 16px;
             font-size: 12px;
-            font-weight: 600;
-            margin-right: 10px;
+            font-weight: 500;
         }
 
-        .alarm-item.distance .alarm-type-badge {
-            background-color: var(--secondary-color);
-            color: white;
+        .alarm-type.distance_violation {
+            background: #FFE0E0;
+            color: #D32F2F;
         }
 
-        .alarm-item.restricted .alarm-type-badge {
-            background-color: var(--accent-color);
-            color: white;
+        .alarm-type.restricted_area {
+            background: #FFF3E0;
+            color: #F57C00;
         }
 
-        .alarm-item.no-update .alarm-type-badge {
-            background-color: var(--warning-color);
-            color: white;
+        .alarm-type.no_update {
+            background: #E3F2FD;
+            color: #1976D2;
         }
 
         .alarm-time {
             color: #666;
-            font-size: 12px;
-            display: inline-block;
+            font-size: 14px;
+        }
+
+        .alarm-message {
+            margin: 0;
+            color: #333;
         }
 
         .resolve-btn {
-            background-color: var(--primary-color);
-            color: white;
+            padding: 8px 16px;
             border: none;
-            padding: 8px 15px;
             border-radius: 4px;
+            background: var(--accent-color);
+            color: white;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
+            transition: background 0.3s ease;
         }
 
-        .alarm-item.distance {
-            border-left-color: var(--secondary-color);
+        .resolve-btn:hover {
+            background: var(--accent-color-dark);
         }
 
-        .alarm-item.restricted {
-            border-left-color: var(--accent-color);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .alarm-item.no-update {
-            border-left-color: var(--warning-color);
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
         }
     </style>
 </head>
@@ -364,31 +384,31 @@
         <div class="stats-container">
             <div class="stat-card">
                 <h3>Active Alarms</h3>
-                <span class="stat-value" id="active-alarms">-</span>
+                <span class="stat-value" id="active-alarms-count">-</span>
                 <p>There are active alarms that need attention</p>
             </div>
             
             <div class="stat-card">
                 <h3>Patients</h3>
-                <span class="stat-value" id="total-patients">-</span>
+                <span class="stat-value" id="total-patients-count">-</span>
                 <p>Total patients being monitored</p>
             </div>
             
             <div class="stat-card">
                 <h3>Distance Violations</h3>
-                <span class="stat-value" id="distance-violations">-</span>
+                <span class="stat-value" id="distance-violations-count">-</span>
                 <p>Patients outside their allowed radius</p>
             </div>
             
             <div class="stat-card">
                 <h3>Restricted Areas</h3>
-                <span class="stat-value" id="restricted-areas">-</span>
+                <span class="stat-value" id="restricted-areas-count">-</span>
                 <p>Patients in prohibited zones</p>
             </div>
 
             <div class="stat-card">
                 <h3>No Updates</h3>
-                <span class="stat-value" id="no-updates">-</span>
+                <span class="stat-value" id="no-updates-count">-</span>
                 <p>Patients with no recent location updates</p>
             </div>
         </div>
@@ -407,10 +427,18 @@
                 </div>
                 
                 <div class="filter-buttons">
-                    <button class="active">All</button>
-                    <button>Distance</button>
-                    <button>Restricted</button>
-                    <button>No Update</button>
+                    <button class="filter-btn active" data-type="all">
+                        All <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-type="distance_violation">
+                        Distance <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-type="restricted_area">
+                        Restricted <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-type="no_update">
+                        No Update <span class="count">0</span>
+                    </button>
                 </div>
 
                 <div class="alarms-list" id="alarms-list">
@@ -585,15 +613,19 @@
         async function updateStats() {
             try {
                 const response = await fetch('http://localhost:8000/api/stats');
-                const data = await response.json();
+                const stats = await response.json();
                 
-                // Update the DOM with new values, except active alarms which is handled by updateAlarms
-                document.getElementById('total-patients').textContent = data.total_patients;
-                document.getElementById('distance-violations').textContent = data.distance_violations;
-                document.getElementById('restricted-areas').textContent = data.restricted_areas;
-                document.getElementById('no-updates').textContent = data.no_updates;
+                // Update stats cards
+                document.getElementById('active-alarms-count').textContent = stats.active_alarms;
+                document.getElementById('total-patients-count').textContent = stats.total_patients;
+                document.getElementById('distance-violations-count').textContent = stats.distance_violations;
+                document.getElementById('restricted-areas-count').textContent = stats.restricted_areas;
+                document.getElementById('no-updates-count').textContent = stats.no_updates;
+                
+                // Update alarm count badge
+                document.querySelector('.alarm-count').textContent = `${stats.active_alarms} Alerts`;
             } catch (error) {
-                console.error('Error fetching stats:', error);
+                console.error('Error updating stats:', error);
             }
         }
 
@@ -787,28 +819,14 @@
         }
 
         // Add event listeners for alarm filters
-        document.querySelectorAll('.filter-buttons button').forEach(button => {
-            button.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
                 // Remove active class from all buttons
-                document.querySelectorAll('.filter-buttons button').forEach(btn => 
-                    btn.classList.remove('active')
-                );
-                
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 // Add active class to clicked button
-                this.classList.add('active');
-                
-                // Get filter type
-                const filterType = this.textContent.toLowerCase();
-                
-                // Filter alarms
-                const alarms = document.querySelectorAll('.alarm-item');
-                alarms.forEach(alarm => {
-                    if (filterType === 'all') {
-                        alarm.style.display = 'block';
-                    } else {
-                        alarm.style.display = alarm.classList.contains(filterType) ? 'block' : 'none';
-                    }
-                });
+                btn.classList.add('active');
+                // Update alarms display
+                updateAlarms();
             });
         });
 
@@ -844,53 +862,56 @@
                 const response = await fetch('http://localhost:8000/api/alarms');
                 const alarms = await response.json();
                 const alarmsList = document.getElementById('alarms-list');
+                const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-type');
                 
                 // Clear existing alarms
                 alarmsList.innerHTML = '';
                 
-                // Add new alarms
-                alarms.forEach(alarm => {
-                    const alarmElement = createAlarmElement(alarm);
+                // Filter alarms based on active filter
+                const filteredAlarms = activeFilter === 'all' 
+                    ? alarms 
+                    : alarms.filter(alarm => alarm.type === activeFilter);
+                
+                // Add each filtered alarm
+                filteredAlarms.forEach(alarm => {
+                    const alarmElement = document.createElement('div');
+                    alarmElement.className = 'alarm-item';
+                    alarmElement.innerHTML = `
+                        <div class="alarm-content">
+                            <div class="alarm-header">
+                                <span class="alarm-type ${alarm.type}">${alarm.type.replace('_', ' ')}</span>
+                                <span class="alarm-time">${formatTimestamp(alarm.timestamp)}</span>
+                            </div>
+                            <p class="alarm-message">${alarm.message}</p>
+                        </div>
+                        <button class="resolve-btn" onclick="resolveAlarm(${alarm.id}, this.parentElement)">
+                            Resolve
+                        </button>
+                    `;
                     alarmsList.appendChild(alarmElement);
                 });
                 
-                // Update both displays with the actual number of active alarms
-                const alarmCount = alarms.length;
-                document.querySelector('.alarm-count').textContent = `${alarmCount} Alerts`;
-                document.getElementById('active-alarms').textContent = alarmCount;
+                // Update filter counts
+                updateFilterCounts(alarms);
             } catch (error) {
-                console.error('Error fetching alarms:', error);
+                console.error('Error updating alarms:', error);
             }
         }
 
-        function createAlarmElement(alarm) {
-            const div = document.createElement('div');
-            div.className = `alarm-item ${alarm.type.toLowerCase()}`;
+        function updateFilterCounts(alarms) {
+            const counts = {
+                'all': alarms.length,
+                'distance_violation': alarms.filter(a => a.type === 'distance_violation').length,
+                'restricted_area': alarms.filter(a => a.type === 'restricted_area').length,
+                'no_update': alarms.filter(a => a.type === 'no_update').length
+            };
             
-            const formattedTime = new Date(alarm.timestamp).toLocaleString('en-US', {
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
+            // Update filter button counts
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                const type = btn.getAttribute('data-type');
+                const count = counts[type] || 0;
+                btn.querySelector('.count').textContent = count;
             });
-            const formattedDate = new Date(alarm.timestamp).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-            
-            div.innerHTML = `
-                <div class="alarm-type-badge">${alarm.type}</div>
-                <div class="alarm-time">${formattedTime} · ${formattedDate}</div>
-                <h3>${alarm.patient_name}</h3>
-                <p>${alarm.message}</p>
-                <button class="resolve-btn" data-alarm-id="${alarm.id}">Resolve</button>
-            `;
-            
-            // Add click handler for resolve button
-            const resolveBtn = div.querySelector('.resolve-btn');
-            resolveBtn.addEventListener('click', () => resolveAlarm(alarm.id, div));
-            
-            return div;
         }
 
         async function resolveAlarm(alarmId, element) {
@@ -900,42 +921,46 @@
                 });
                 
                 if (response.ok) {
-                    // Add fade out animation
-                    element.style.opacity = '0';
-                    element.style.transition = 'opacity 0.3s ease';
-                    
-                    // Remove element and update counts
-                    setTimeout(async () => {
+                    // Add fade-out animation
+                    element.style.animation = 'fadeOut 0.5s ease';
+                    // Remove element after animation
+                    setTimeout(() => {
                         element.remove();
-                        
-                        // Fetch fresh alarm data to ensure accurate count
-                        const alarmsResponse = await fetch('http://localhost:8000/api/alarms');
-                        const alarms = await alarmsResponse.json();
-                        const newCount = alarms.length;
-                        
-                        // Update both displays with the same accurate count
-                        document.getElementById('active-alarms').textContent = newCount;
-                        document.querySelector('.alarm-count').textContent = `${newCount} Alerts`;
-                        
-                        // Also update the map to reflect the current state
-                        loadMapData();
-                    }, 300);
+                        // Update stats after resolving
+                        updateStats();
+                        // Refresh alarms list
+                        updateAlarms();
+                    }, 500);
+                } else {
+                    console.error('Failed to resolve alarm:', await response.text());
                 }
             } catch (error) {
                 console.error('Error resolving alarm:', error);
             }
         }
 
-        // Update both stats and alarms periodically
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            });
+        }
+
+        // Start periodic updates
         function startPeriodicUpdates() {
-            // Initial updates
-            updateAlarms();  // This will set the alarm count
-            updateStats();   // This will update other stats
+            // Initial update
+            updateStats();
+            updateAlarms();
             
-            // Periodic updates
+            // Set up periodic updates
             setInterval(() => {
-                updateAlarms();  // This will set the alarm count
-                updateStats();   // This will update other stats
+                updateStats();
+                updateAlarms();
             }, 60000); // Update every minute
         }
 
