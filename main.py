@@ -67,11 +67,16 @@ async def receive_location(location: LocationUpdate):
 
         if result:
             user_id = result['id']
+            # Update last_seen
+            cursor.execute(
+                "UPDATE users SET last_seen = %s WHERE id = %s",
+                (timestamp, user_id)
+            )
         else:
             # Register new user with initial location
             cursor.execute(
-                "INSERT INTO users (username, initial_lat, initial_lng) VALUES (%s, %s, %s)",
-                (location.tid, location.lat, location.lon)
+                "INSERT INTO users (username, initial_lat, initial_lng, last_seen) VALUES (%s, %s, %s, %s)",
+                (location.tid, location.lat, location.lon, timestamp)
             )
             conn.commit()
             user_id = cursor.lastrowid

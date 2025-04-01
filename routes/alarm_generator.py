@@ -39,9 +39,9 @@ async def generate_alarms():
                 u.home_lat,
                 u.home_lng,
                 u.home_location_set,
+                u.last_seen,
                 l.lat,
-                l.lng,
-                l.timestamp as last_update
+                l.lng
             FROM users u
             LEFT JOIN (
                 SELECT l1.*
@@ -102,7 +102,7 @@ async def generate_alarms():
                 alarms_created += cursor.rowcount
             
             # 3. Check for no updates (if last update is more than NO_UPDATE_THRESHOLD old)
-            if user['last_update'] and (now - user['last_update']).total_seconds() > MONITORING_CONFIG["NO_UPDATE_THRESHOLD"]:
+            if user['last_seen'] and (now - user['last_seen']).total_seconds() > MONITORING_CONFIG["NO_UPDATE_THRESHOLD"]:
                 cursor.execute("""
                     INSERT INTO alarms (user_id, alarm_type, timestamp, status)
                     VALUES (%s, 'no_update', NOW(), 'active')
