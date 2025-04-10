@@ -22,12 +22,12 @@ def get_last_location(tid: str = None):
             cursor.execute("""
                 SELECT l.*
                 FROM locations l
-                JOIN (
-                    SELECT tid, MAX(timestamp) AS max_timestamp
+                INNER JOIN (
+                    SELECT tid, MAX(id) as max_id
                     FROM locations
                     GROUP BY tid
-                ) latest
-                ON l.tid = latest.tid AND l.timestamp = latest.max_timestamp
+                ) latest ON l.id = latest.max_id
+                ORDER BY l.timestamp DESC
             """)
 
         rows = cursor.fetchall()

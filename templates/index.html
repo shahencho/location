@@ -474,9 +474,12 @@
         let restrictedZones = [];
         let allowedRadiuses = [];
 
+        // Get the base URL from the current window location
+        const BASE_URL = window.location.origin;
+
         async function loadMapConfig() {
             try {
-                const response = await fetch('http://localhost:8000/api/config');
+                const response = await fetch(`${BASE_URL}/api/config`);
                 mapConfig = await response.json();
                 console.log('Loaded map config:', mapConfig);
                 
@@ -612,7 +615,7 @@
         // Function to fetch and update statistics
         async function updateStats() {
             try {
-                const response = await fetch('http://localhost:8000/api/stats');
+                const response = await fetch(`${BASE_URL}/api/stats`);
                 const stats = await response.json();
                 
                 // Update stats cards
@@ -631,7 +634,7 @@
 
         async function loadMapData() {
             try {
-                const response = await fetch('http://localhost:8000/api/map-data');
+                const response = await fetch(`${BASE_URL}/api/map-data`);
                 const data = await response.json();
                 
                 // Clear existing markers and overlays
@@ -859,7 +862,7 @@
 
         async function updateAlarms() {
             try {
-                const response = await fetch('http://localhost:8000/api/alarms');
+                const response = await fetch(`${BASE_URL}/api/alarms`);
                 const alarms = await response.json();
                 const alarmsList = document.getElementById('alarms-list');
                 const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-type');
@@ -916,7 +919,7 @@
 
         async function resolveAlarm(alarmId, element) {
             try {
-                const response = await fetch(`http://localhost:8000/api/alarms/${alarmId}/resolve`, {
+                const response = await fetch(`${BASE_URL}/api/alarms/${alarmId}/resolve`, {
                     method: 'POST'
                 });
                 
