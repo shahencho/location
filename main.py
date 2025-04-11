@@ -36,6 +36,7 @@ app.include_router(alarm_generator.router)
 # Rate limiting: Store last update time for each device
 last_updates = {}
 MINIMUM_UPDATE_INTERVAL = 1200  # 20 minutes in seconds
+MINIMUM_UPDATE_INTERVAL = 0  # for testing
 LOG_INTERVAL = 3600  # 1 hour in seconds
 
 async def initialize_last_updates():
@@ -135,10 +136,20 @@ async def receive_location(location: LocationUpdate):
                 (timestamp, user_id)
             )
         else:
-            # Register new user with initial location
+            # Register new user with initial location and set home location
             cursor.execute(
-                "INSERT INTO users (username, initial_lat, initial_lng, last_seen) VALUES (%s, %s, %s, %s)",
-                (location.tid, location.lat, location.lon, timestamp)
+                """INSERT INTO users 
+                   (username, tid, initial_lat, initial_lng, last_seen, 
+                    home_lat, home_lng, home_location_set) 
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, 1)""",
+                (location.tid,          # username
+                 location.tid,          # tid (same as username)
+                 location.lat,          # initial_lat
+                 location.lon,          # initial_lng
+                 timestamp,            # last_seen
+                 location.lat,          # home_lat (same as initial location)
+                 location.lon,          # home_lng (same as initial location)
+                )
             )
             conn.commit()
             user_id = cursor.lastrowid
